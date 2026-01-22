@@ -1,0 +1,62 @@
+name: build-frida-gadget-android-arm64
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref (branch/tag/sha)'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git python3 python3-pip python3-setuptools python3-wheel \
+            ninja-build meson pkg-config \
+            build-essential clang \
+            bison flex \
+            curl wget xz-utils unzip
+
+      - name: Configure (Android arm64, JS-enabled gadget)
+        run: |
+          ./configure --host=android-arm64 -- \
+            -Dgadget=enabled \
+            -Dserver=disabled \
+            -Dinject=disabled \
+            -Dfrida_tools=disabled \
+            -Dfrida_python=disabled \
+            -Dfrida_node=disabled \
+            -Dfrida_qml=disabled \
+            -Dfrida_swift=disabled \
+            -Dportal=disabled \
+            -Dfrida-gum:gumjs=enabled \
+            -Dfrida-gum:quickjs=enabled \
+            -Dfrida-gum:v8=disabled
+
+      - name: Build
+        run: |
+          make -j"$(nproc)"
+
+      - name: Collect gadget
+        run: |
+          mkdir -p dist
+          find build -name "libfrida-gadget*.so*" -print -exec cp -f {} dist/ \;
+          ls -la dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-gadget-android-arm64-js
+          path: dist/
