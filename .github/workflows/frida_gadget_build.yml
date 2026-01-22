@@ -65,23 +65,7 @@ jobs:
             -Dportal=disabled \
             -Dfrida-gum:gumjs=enabled \
             -Dfrida-gum:quickjs=enabled \
-            -Dfrida-gum:v8=disabled \
-            -Dfrida-gum:database=enabled \
-            -Dfrida-gum:diet=false
-
-      - name: Show Meson build options (gumjs/quickjs/gadget)
-        run: |
-          if [ -d build ]; then
-            meson introspect build --buildoptions | \
-              python3 - <<'PY'
-import json,sys
-opts = json.load(sys.stdin)
-for o in opts:
-    name = o.get('name','')
-    if any(k in name for k in ('gadget','gumjs','quickjs','v8','gum')):
-        print(f"{name}={o.get('value')}")
-PY
-          fi
+            -Dfrida-gum:v8=disabled
 
       - name: Build
         run: |
