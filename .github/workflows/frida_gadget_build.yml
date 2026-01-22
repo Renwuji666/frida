@@ -69,7 +69,7 @@ jobs:
 
       - name: Force gumjs/quickjs (meson configure)
         run: |
-          meson configure build \
+          python3 releng/meson/meson.py configure build \
             -Dfrida-gum:gumjs=enabled \
             -Dfrida-gum:quickjs=enabled \
             -Dfrida-gum:v8=disabled
