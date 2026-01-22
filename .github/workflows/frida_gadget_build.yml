@@ -51,13 +51,6 @@ jobs:
           echo "ANDROID_NDK_ROOT=$SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
           echo "ANDROID_NDK_HOME=$SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
 
-      - name: Patch frida-gum options (force gumjs/quickjs enabled)
-        run: |
-          perl -0777 -i -pe "s/option\('gumjs',\n\s*type: 'feature',\n\s*value: 'disabled'/option('gumjs',\n  type: 'feature',\n  value: 'enabled'/" subprojects/frida-gum/meson.options
-          perl -0777 -i -pe "s/option\('quickjs',\n\s*type: 'feature',\n\s*value: 'enabled'/option('quickjs',\n  type: 'feature',\n  value: 'enabled'/" subprojects/frida-gum/meson.options
-          grep -n "option('gumjs'" -A3 subprojects/frida-gum/meson.options
-          grep -n "option('quickjs'" -A3 subprojects/frida-gum/meson.options
-
       - name: Configure (Android arm64, JS-enabled gadget)
         run: |
           ./configure --host=android-arm64 -- \
@@ -73,6 +66,19 @@ jobs:
             -Dfrida-gum:gumjs=enabled \
             -Dfrida-gum:quickjs=enabled \
             -Dfrida-gum:v8=disabled
+          meson configure build \
+            -Dfrida-gum:gumjs=enabled \
+            -Dfrida-gum:quickjs=enabled \
+            -Dfrida-gum:v8=disabled
+          meson introspect build --buildoptions | \
+            python3 - <<'PY'
+import json,sys
+opts = json.load(sys.stdin)
+for o in opts:
+    name = o.get('name','')
+    if any(k in name for k in ('gadget','gumjs','quickjs','v8','gum')):
+        print(f"{name}={o.get('value')}")
+PY
 
       - name: Build
         run: |
