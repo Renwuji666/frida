@@ -65,7 +65,29 @@ jobs:
             -Dportal=disabled \
             -Dfrida-gum:gumjs=enabled \
             -Dfrida-gum:quickjs=enabled \
-            -Dfrida-gum:v8=disabled
+            -Dfrida-gum:v8=disabled \
+            -Dfrida-gum:database=enabled \
+            -Dfrida-gum:diet=false
+
+      - name: Show Meson configuration summary
+        run: |
+          if [ -f build/meson-logs/meson-log.txt ]; then
+            tail -n 200 build/meson-logs/meson-log.txt || true
+          fi
+          if [ -f build/meson-private/coredata.dat ]; then
+            python3 - <<'PY'
+import pickle
+from pathlib import Path
+p = Path('build/meson-private/coredata.dat')
+if p.exists():
+    data = pickle.loads(p.read_bytes())
+    opts = data.options
+    # print relevant options if present
+    for key in sorted(opts.keys()):
+        if 'gum' in key or 'quickjs' in key or 'v8' in key or 'gadget' in key:
+            print(key, opts[key].value)
+PY
+          fi
 
       - name: Build
         run: |
