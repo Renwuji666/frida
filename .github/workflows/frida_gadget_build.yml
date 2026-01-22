@@ -51,6 +51,13 @@ jobs:
           echo "ANDROID_NDK_ROOT=$SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
           echo "ANDROID_NDK_HOME=$SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
 
+      - name: Patch frida-gum options (force gumjs/quickjs enabled)
+        run: |
+          sed -i "s/value: 'disabled'/value: 'enabled'/" subprojects/frida-gum/meson.options
+          sed -i "s/value: 'auto'/value: 'enabled'/" subprojects/frida-gum/meson.options
+          grep -n "option('gumjs'" -A3 subprojects/frida-gum/meson.options
+          grep -n "option('quickjs'" -A3 subprojects/frida-gum/meson.options
+
       - name: Configure (Android arm64, JS-enabled gadget)
         run: |
           ./configure --host=android-arm64 -- \
