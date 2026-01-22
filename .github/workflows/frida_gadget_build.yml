@@ -63,7 +63,6 @@ jobs:
             -Dfrida_qml=disabled \
             -Dfrida_swift=disabled \
             -Dportal=disabled \
-            -Dcompat=disabled \
             -Dfrida-gum:gumjs=enabled \
             -Dfrida-gum:quickjs=enabled \
             -Dfrida-gum:v8=disabled
