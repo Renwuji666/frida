@@ -74,6 +74,12 @@ jobs:
             -Dfrida-gum:quickjs=enabled \
             -Dfrida-gum:v8=disabled
 
+      - name: Show gumjs/quickjs status
+        run: |
+          if [ -f build/meson-logs/meson-log.txt ]; then
+            grep -i -E "gumjs|quickjs|v8" build/meson-logs/meson-log.txt || true
+          fi
+
       - name: Build
         run: |
           make -j"$(nproc)"
