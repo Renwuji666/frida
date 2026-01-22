@@ -63,6 +63,7 @@ jobs:
             -Dfrida_qml=disabled \
             -Dfrida_swift=disabled \
             -Dportal=disabled \
+            -Dcompat=disabled \
             -Dfrida-gum:gumjs=enabled \
             -Dfrida-gum:quickjs=enabled \
             -Dfrida-gum:v8=disabled
@@ -74,20 +75,19 @@ jobs:
             -Dfrida-gum:quickjs=enabled \
             -Dfrida-gum:v8=disabled
 
-      - name: Show gumjs/quickjs status
-        run: |
-          if [ -f build/meson-logs/meson-log.txt ]; then
-            grep -i -E "gumjs|quickjs|v8" build/meson-logs/meson-log.txt || true
-          fi
-
       - name: Build
         run: |
           make -j"$(nproc)"
 
-      - name: Collect gadget
+      - name: Collect 64-bit gadget
         run: |
           mkdir -p dist
-          find build -name "libfrida-gadget*.so*" -print -exec cp -f {} dist/ \;
+          find build -name "libfrida-gadget-*.so" -o -name "libfrida-gadget*.so" | while read -r f; do
+            if file "$f" | grep -q "aarch64"; then
+              cp -f "$f" dist/
+              file "$f"
+            fi
+          done
           ls -la dist
 
       - name: Upload artifact
