@@ -53,8 +53,8 @@ jobs:
 
       - name: Patch frida-gum options (force gumjs/quickjs enabled)
         run: |
-          sed -i "s/value: 'disabled'/value: 'enabled'/" subprojects/frida-gum/meson.options
-          sed -i "s/value: 'auto'/value: 'enabled'/" subprojects/frida-gum/meson.options
+          perl -0777 -i -pe "s/option\('gumjs',\n\s*type: 'feature',\n\s*value: 'disabled'/option('gumjs',\n  type: 'feature',\n  value: 'enabled'/" subprojects/frida-gum/meson.options
+          perl -0777 -i -pe "s/option\('quickjs',\n\s*type: 'feature',\n\s*value: 'enabled'/option('quickjs',\n  type: 'feature',\n  value: 'enabled'/" subprojects/frida-gum/meson.options
           grep -n "option('gumjs'" -A3 subprojects/frida-gum/meson.options
           grep -n "option('quickjs'" -A3 subprojects/frida-gum/meson.options
 
