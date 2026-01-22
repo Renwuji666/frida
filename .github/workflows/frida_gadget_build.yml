@@ -69,23 +69,17 @@ jobs:
             -Dfrida-gum:database=enabled \
             -Dfrida-gum:diet=false
 
-      - name: Show Meson configuration summary
+      - name: Show Meson build options (gumjs/quickjs/gadget)
         run: |
-          if [ -f build/meson-logs/meson-log.txt ]; then
-            tail -n 200 build/meson-logs/meson-log.txt || true
-          fi
-          if [ -f build/meson-private/coredata.dat ]; then
-            python3 - <<'PY'
-import pickle
-from pathlib import Path
-p = Path('build/meson-private/coredata.dat')
-if p.exists():
-    data = pickle.loads(p.read_bytes())
-    opts = data.options
-    # print relevant options if present
-    for key in sorted(opts.keys()):
-        if 'gum' in key or 'quickjs' in key or 'v8' in key or 'gadget' in key:
-            print(key, opts[key].value)
+          if [ -d build ]; then
+            meson introspect build --buildoptions | \
+              python3 - <<'PY'
+import json,sys
+opts = json.load(sys.stdin)
+for o in opts:
+    name = o.get('name','')
+    if any(k in name for k in ('gadget','gumjs','quickjs','v8','gum')):
+        print(f"{name}={o.get('value')}")
 PY
           fi
 
